@@ -1,0 +1,26 @@
+- instalação do node.js
+
+- instalação do vsCode
+
+- instalação do Yarn
+  npm install -g Yarn 
+
+- instalação do create-react-app
+  npm install -g create-react-app  
+  conferindo a versão: create-react-app --version
+
+- instalação do git e criando conta no github
+
+- comando para criar um novo projeto 'react'
+  npx create-react-app nome-projeto
+
+- documentação do react
+  https://pt-br.reactjs.org/
+
+- executando a aplicação criada
+  yarn start
+
+
+
+
+
