@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import validate from 'validate.js';
 import { makeStyles } from '@material-ui/styles';
 import {
   Grid,
@@ -12,8 +11,6 @@ import {
   Typography
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-
-import { Facebook as FacebookIcon, Google as GoogleIcon } from 'icons';
 
 const schema = {
   email: {
@@ -159,17 +156,16 @@ const SignIn = props =>
             <div className={classes.quoteInner}>
               <Typography
                 className={classes.quoteText}
-                variant="h1"
+                variant="h3"
               >
-                Hella narwhal Cosby sweater McSweeney's, salvia kitsch before
-                they sold out High Life.
+                gerenciamento de tarefas
               </Typography>
               <div className={classes.person}>
                 <Typography
                   className={classes.name}
                   variant="body1"
                 >
-                  Takamaru Ayako
+                 RochaSoft
                 </Typography>
                 <Typography
                   className={classes.bio}
@@ -210,7 +206,7 @@ const SignIn = props =>
                   align="center"
                   className={classes.sugestion}
                   color="textSecondary"
-                  variant="body1"
+                  variant="body2"
                 >
                   entre com seu endereço de e-mail
                 </Typography>

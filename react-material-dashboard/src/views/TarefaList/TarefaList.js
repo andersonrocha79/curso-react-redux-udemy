@@ -2,6 +2,10 @@ import React, { useState ,useEffect } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { TarefasToolbar, TarefasTable } from './components';
 
+import { bindActionCreators }       from 'redux';
+import { connect }                  from 'react-redux';
+import { listar, salvar, excluir }  from '../../store/tarefasReducer';
+
 import { Button, Dialog, DialogContent, DialogActions, DialogTitle } from "@material-ui/core";
 
 import axios from 'axios'; 
@@ -20,7 +24,7 @@ const useStyles = makeStyles(theme => (
 
 const API_URL = "https://minhastarefas-api.herokuapp.com/tarefas";
 
-const TarefasList = () => 
+const TarefasList = (props) => 
 {
 
     const classes                       = useStyles();
@@ -28,61 +32,6 @@ const TarefasList = () =>
     const [openDialog, setOpenDialog]   = useState(false);
     const [mensagem, setMensagem]       = useState("");
    
-    const salvar = (tarefa) =>
-    {
-
-        axios.post( API_URL,
-                    tarefa,
-                    {
-                        headers : 
-                        {
-                            'x-tenant-id' : localStorage.getItem("email_usuario_logado")
-                        }
-                    }).then(response =>
-                    {
-
-                        console.log("sucesso: ", response.data);
-
-                        const novaTarefa = response.data;
-
-                        if (novaTarefa)
-                        {
-                            setTarefas([...tarefas, novaTarefa]);
-                        }
-                        
-                        setMensagem("Tarefa registrada com Sucesso!");
-                        setOpenDialog(true); 
-                        
-                    }).catch(err =>
-                    {
-                        console.log("erro: ", err);
-                        setMensagem("Falha durante processamento.");
-                        setOpenDialog(true); 
-                    });
-    }
-
-    const listarTarefas = () =>
-    {
-
-        axios.get(API_URL,
-        {        
-            headers : 
-            {
-                'x-tenant-id' : localStorage.getItem("email_usuario_logado")
-            }
-        }).then(response =>
-        {
-            console.log("sucesso ao buscar tarefas: ", response.data);
-            const listarTarefas = response.data;
-            setTarefas(listarTarefas);
-        }).catch(err =>
-        {
-            console.log("erro ao buscar tarefas: ", err);
-            setMensagem("Falha durante selecionar as tarefas no servidor");
-            setOpenDialog(true);               
-        });
-                
-    }
 
     const alterarStatus = (id) =>
     {
@@ -122,52 +71,24 @@ const TarefasList = () =>
                     });        
     }
 
-    const excluir = (id) => 
-    {
-
-        axios.delete(`${API_URL}/${id}`,
-                     {
-                        headers : 
-                        {
-                            'x-tenant-id' : localStorage.getItem("email_usuario_logado")
-                        }
-                     }).then(response =>
-                     {
-
-                        console.log("registro excluido com sucesso: ", response.status);
-
-                        // retorna os registros, sem a tarefa deletada
-                        const lista = tarefas.filter( tarefa => tarefa.id !== id);
-                        setTarefas(lista);    
-                        
-                        setMensagem("Tarefa excluída com Sucesso!");
-                        setOpenDialog(true);                        
-                        
-                    }).catch(err =>
-                    {
-                        console.log("erro: ", err);
-                        setMensagem("Falha ao tentar excluir a tarefa.");
-                        setOpenDialog(true);                        
-                    });           
-    }
-
     useEffect( () =>
     {
 
         // busca as tarefas após carregar a página
-        listarTarefas();
+        // utilizando redux
+        props.listar();
 
     }, []);
 
     return (
 
         <div className={classes.root}>
-            <TarefasToolbar salvar={salvar} />
+            <TarefasToolbar salvar={props.salvar} />
             <div className={classes.content}>
                 <TarefasTable 
-                    tarefas={tarefas}
+                    tarefas={props.tarefas}
                     alterarStatus={alterarStatus}
-                    deleteAction={excluir} >
+                    deleteAction={props.excluir} >
                 </TarefasTable>
             </div>
 
@@ -187,4 +108,13 @@ const TarefasList = () =>
     
 };
 
-export default TarefasList;
+const mapStateToProps = state =>
+({
+    tarefas: state.tarefas.tarefas
+});
+
+// mantém os métodos do 'reducer' no 'props' deste componente
+const mapDispatchToProps = dispatch => bindActionCreators({listar, salvar, excluir}, dispatch);
+
+
+export default connect(mapStateToProps, mapDispatchToProps) (TarefasList);
