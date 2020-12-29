@@ -11,6 +11,9 @@ import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 
 import { withRouter } from 'react-router-dom';
 
+import { connect } from 'react-redux';
+import { compose } from 'redux';
+
 const useStyles = makeStyles(theme => ({
   root: {
     boxShadow: 'none'
@@ -28,15 +31,15 @@ const Topbar = props =>
 
     const { className, onSidebarOpen, ...rest } = props;
 
-  const classes = useStyles();
+    const classes = useStyles();
 
-  const [notifications] = useState([]);
+    const [notifications] = useState([]);
 
-  const logout = () =>
-  {
-      localStorage.removeItem("email_usuario_logado");
-      props.history.push("/login");
-  }
+    const logout = () =>
+    {
+        localStorage.removeItem("email_usuario_logado");
+        props.history.push("/login");
+    }
 
   return (
     <AppBar
@@ -44,29 +47,20 @@ const Topbar = props =>
       className={clsx(classes.root, className)}
     >
       <Toolbar>
-        <RouterLink to="/">
 
-        <Button
-            activeClassName={classes.active}
-            className={classes.button}
-        >
-            <div className={classes.icon}> <WorkOutlineIcon /></div>
-            <Typography
-                color="textSecondary"
-                gutterBottom
-            >
-                CONTROLE DE TAREFAS
-            </Typography>
-        </Button>
+        <RouterLink to="/">
+        <img
+            alt="logo"
+            src="/images/logos/logo--white.svg"
+        />
 
         </RouterLink>
         <div className={classes.flexGrow} />
         <Hidden mdDown>
           <IconButton color="inherit">
             <Badge
-              badgeContent={notifications.length}
-              color="primary"
-              variant="dot"
+              badgeContent={props.notificacoes}
+              color="secondary"
             >
               <NotificationsIcon />
             </Badge>
@@ -93,8 +87,13 @@ const Topbar = props =>
 };
 
 Topbar.propTypes = {
-  className: PropTypes.string,
-  onSidebarOpen: PropTypes.func
+    className: PropTypes.string,
+    onSidebarOpen: PropTypes.func
 };
 
-export default withRouter(Topbar);
+const mapStateToProps = state => (
+{
+    notificacoes: state.tarefas.quantidade
+});
+
+export default compose(connect(mapStateToProps), withRouter) (Topbar);

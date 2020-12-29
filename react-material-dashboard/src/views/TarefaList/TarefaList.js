@@ -1,14 +1,23 @@
-import React, { useState ,useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { TarefasToolbar, TarefasTable } from './components';
 
 import { bindActionCreators }       from 'redux';
 import { connect }                  from 'react-redux';
-import { listar, salvar, excluir }  from '../../store/tarefasReducer';
+
+// importação das funções 'reducer'
+import  { 
+            listar, 
+            salvar, 
+            excluir,
+            alterarStatus 
+        }   from '../../store/tarefasReducer';
+
+import  {
+            esconderMensagem
+        }   from '../../store/mensagensReducer';
 
 import { Button, Dialog, DialogContent, DialogActions, DialogTitle } from "@material-ui/core";
-
-import axios from 'axios'; 
 
 const useStyles = makeStyles(theme => (
 {
@@ -22,54 +31,10 @@ const useStyles = makeStyles(theme => (
     }
 }));
 
-const API_URL = "https://minhastarefas-api.herokuapp.com/tarefas";
-
 const TarefasList = (props) => 
 {
 
-    const classes                       = useStyles();
-    const [tarefas, setTarefas]         = useState([]);
-    const [openDialog, setOpenDialog]   = useState(false);
-    const [mensagem, setMensagem]       = useState("");
-   
-
-    const alterarStatus = (id) =>
-    {
-
-        axios.patch( `${API_URL}/${id}`,
-                     null,
-                     {
-                        headers : 
-                        {
-                            'x-tenant-id' : localStorage.getItem("email_usuario_logado")
-                        }
-                     }).then(response =>
-                     {
-
-                        console.log("sucesso na alteração do status: ", response.status);
-
-                        // procura a tarefa alterada e faz a atualização
-                        // para não precisar recarregar a lista
-                        const lista = [...tarefas];
-                        lista.forEach(tarefa =>
-                        {
-                            if (tarefa.id === id)  
-                            {
-                                tarefa.done = true;
-                            }
-                        });
-                        setTarefas(lista);
-
-                        setMensagem("Tarefa finalizada com Sucesso!");
-                        setOpenDialog(true);                        
-                        
-                    }).catch(err =>
-                    {
-                        console.log("erro: ", err);
-                        setMensagem("Falha ao tentar finalizar a tarefa.");
-                        setOpenDialog(true);                        
-                    });        
-    }
+    const classes = useStyles();  
 
     useEffect( () =>
     {
@@ -87,18 +52,18 @@ const TarefasList = (props) =>
             <div className={classes.content}>
                 <TarefasTable 
                     tarefas={props.tarefas}
-                    alterarStatus={alterarStatus}
+                    alterarStatus={props.alterarStatus}
                     deleteAction={props.excluir} >
                 </TarefasTable>
             </div>
 
             <Dialog 
-                open={openDialog}
-                onClose={e => setOpenDialog(false)}>
+                open={props.openDialog}
+                onClose={props.esconderMensagem}>
                 <DialogTitle>Atenção</DialogTitle>
-                <DialogContent>{mensagem}</DialogContent>
+                <DialogContent>{props.mensagem}</DialogContent>
                 <DialogActions>
-                    <Button onClick={e => setOpenDialog(false)}>Fechar</Button>
+                    <Button onClick={props.esconderMensagem}>Fechar</Button>
                 </DialogActions>
             </Dialog>
 
@@ -110,11 +75,22 @@ const TarefasList = (props) =>
 
 const mapStateToProps = state =>
 ({
-    tarefas: state.tarefas.tarefas
+    tarefas: state.tarefas.tarefas,
+    mensagem: state.mensagens.mensagem,
+    openDialog: state.mensagens.mostrarMensagem
 });
 
 // mantém os métodos do 'reducer' no 'props' deste componente
-const mapDispatchToProps = dispatch => bindActionCreators({listar, salvar, excluir}, dispatch);
+const mapDispatchToProps = dispatch => 
+bindActionCreators(
+{
+    listar, 
+    salvar, 
+    excluir, 
+    alterarStatus,
+    esconderMensagem
+}, 
+dispatch);
 
 
 export default connect(mapStateToProps, mapDispatchToProps) (TarefasList);

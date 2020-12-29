@@ -2,12 +2,14 @@
 // reducer principal da aplicação
 import { combineReducers } from 'redux';
 
-import { tarefaReducer } from './tarefasReducer';
+import { tarefaReducer   } from './tarefasReducer';
+import { mensagemReducer } from './mensagensReducer';
 
 const mainReducer = combineReducers(
 {
     
-    tarefas : tarefasReducer    
+    tarefas   : tarefaReducer,
+    mensagens : mensagemReducer
 
 })
 

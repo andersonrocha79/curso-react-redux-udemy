@@ -1,20 +1,23 @@
 import axios from 'axios';
+import { mostrarMensagem } from './mensagensReducer';
 
 const http = axios.create(
 {
-    baseURL : "https://minhastarefas-api.herokuapp.com"
+    baseURL : process.env.REACT_APP_API_BASE_URL
 });
 
 const ACTIONS =
 {
-    LISTAR  : 'TAREFAS_LISTAR',
-    ADD     : 'TAREFAS_ADD',
-    REMOVER : 'TAREFAS_REMOVE'
+    LISTAR        : 'TAREFAS_LISTAR',
+    ADD           : 'TAREFAS_ADD',
+    REMOVER       : 'TAREFAS_REMOVE',
+    UPDATE_STATUS : 'TAREFAS_UPDATE_STATUS'
 }
 
 const ESTADO_INICIAL = 
 {
-    tarefas : []
+    tarefas : [],
+    quantidade: 0
 }
 
 export const tarefaReducer = (state = ESTADO_INICIAL, action) =>
@@ -24,17 +27,44 @@ export const tarefaReducer = (state = ESTADO_INICIAL, action) =>
     {
 
         case ACTIONS.LISTAR:
-            return {...state, tarefas: action.tarefas}
+            return  {
+                        ...state, 
+                        tarefas: action.tarefas, 
+                        quantidade: action.tarefas.length
+                    }
             break;
 
         case ACTIONS.ADD:
-            return {...state, tarefas: [...state.tarefas, action.tarefa]}
+            const lista = [...state.tarefas, action.tarefa];
+            return  {
+                        ...state, 
+                        tarefas: lista,
+                        quantidade : lista.length 
+                    }
             break;
    
         case ACTIONS.REMOVER:
             const id                = action.id ;
             const tarefasAtualizado = state.tarefas.filter( tarefa => tarefa.id !== id);
-            return {...state, tarefas: tarefasAtualizado};
+            return  {
+                        ...state, 
+                        tarefas: tarefasAtualizado,
+                        quantidade: tarefasAtualizado.length
+                    };
+            break;
+
+        case ACTIONS.UPDATE_STATUS:
+
+            const listaStatusAlterado = [...state.tarefas];
+            listaStatusAlterado.forEach(tarefa =>
+            {
+                if (tarefa.id === action.id)  
+                {
+                    tarefa.done = true;
+                }
+            });
+            return {...state, tarefas: listaStatusAlterado};
+
             break;
 
         default:
@@ -83,11 +113,16 @@ export function salvar(tarefa)
             }
         }).then(response =>
         {
+
             dispatch(
-            {
-                type: ACTIONS.ADD,    
-                tarefa: response.data
-            })
+            [
+                {
+                    type: ACTIONS.ADD,    
+                    tarefa: response.data
+                }, 
+                mostrarMensagem("Tarefa salva com sucesso.")
+            ]);
+
         }).catch(err =>
         {
                 
@@ -110,14 +145,48 @@ export function excluir(id)
         }).then(response =>
         {
             dispatch(
-            {
-                type: ACTIONS.REMOVER,    
-                id: id
-            })
+            [
+                {
+                    type: ACTIONS.REMOVER,    
+                    id: id
+                }, 
+                mostrarMensagem("Tarefas excluída com sucesso.")
+            ]);            
         }).catch(err =>
         {
                 
         });
     }
 
+}
+
+export function alterarStatus(id)
+{
+    return dispatch =>
+    {
+
+        http.patch( `tarefas/${id}`,
+        null,
+        {
+           headers : 
+           {
+               'x-tenant-id' : localStorage.getItem("email_usuario_logado")
+           }
+        }).then(response =>
+        {
+
+            dispatch(
+            [
+                {
+                    type: ACTIONS.UPDATE_STATUS,    
+                    id: id
+                },
+                mostrarMensagem("Status alterado com Sucesso.")
+            ]);
+           
+       }).catch(err =>
+       {
+
+       });                
+    }
 }

@@ -8,10 +8,11 @@ import { Provider }         from 'react-redux';
 import { createStore }      from 'redux';
 import { applyMiddleware }  from 'redux';
 import thunk                from 'redux-thunk';
+import multi                from 'redux-multi';
 import mainReducer          from './store';
 
 // permite disparar várias actions ao mesmo tempo
-const store = applyMiddleware(thunk) (createStore) (mainReducer);
+const store = applyMiddleware(thunk, multi) (createStore) (mainReducer);
 
 ReactDOM.render(
 
